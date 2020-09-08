@@ -1,4 +1,5 @@
-fn main() {
-    println!("Hello, world!");
+use crate::board::Board;
 
+fn main() {
+    board: Board = Board::new();
 }
