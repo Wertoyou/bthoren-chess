@@ -4,6 +4,6 @@ use crate::board::Board;
 mod tests {
     #[test]
     fn board_test() {
-        board: Board = Board::new();
+        board: Board = Board::new(8, 8);
     }
 }
