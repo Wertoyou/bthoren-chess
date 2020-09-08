@@ -1,42 +1,47 @@
-use std::collections::HashSet;
-
-mod board {
-    mod tile {
-        enum Color {
-            Black,
-            White,
-        }
-
-        #[derive(Eq)]
-        struct Tile {
-            pub color: Color,
-
-            pub pos_x: u32,
-            pub pos_y: u32,
-        }
+mod tile {
+    pub enum Color {
+        Black,
+        White,
     }
 
-    struct Board {
-        tiles: Vec<Vec<Tile> >,
-    }
+    pub struct Tile {
+        pub color: Color,
 
-    impl New for Board {
-        fn new (&self, size_x: u32, size_y: u32) {
-            let mut tiles = Vec::new();
-            
-            for i in (0..size_y) {
-                for j in (0..size_x) {
-                    if (i + j) % 2 == 0 {
-                        let next: tile::Tile = {color: tile::Color::White, pos_x: i, pos_y: j};
-                    } else {
-                        let next: tile::Tile = {color: tile::Color::Black, pos_x: i, pos_y: j};
-                    }
-                    tiles[i].push(next);
+        pub pos_x: usize,
+        pub pos_y: usize,
+    }
+}
+
+pub struct Board {
+    tiles: Vec<Vec<tile::Tile> >,
+    pub size_x: usize,
+    pub size_y: usize,
+}
+
+impl Board {
+    pub fn new (size_x: usize, size_y: usize) -> Board {
+        
+        if size_x == 0 || size_y == 0 {
+            panic!("Size of board must be positive integers");
+        }
+
+        let mut tiles: Vec<Vec<tile::Tile>> = Vec::new();
+        
+        for i in 0..size_y {
+            tiles.push(Vec::new());
+            for j in 0..size_x {
+                let next;
+                if (i + j) % 2 == 0 {
+                    next = tile::Tile {color: tile::Color::White, pos_x: i, pos_y: j};
+                } else {
+                    next = tile::Tile {color: tile::Color::Black, pos_x: i, pos_y: j};
                 }
-                tiles.push(Vec::new());
-            }
 
-            let tiles = tiles;
+                tiles[i].push(next);
+            }
         }
+
+        let tiles = tiles;
+        Board {tiles: tiles, size_x: size_x, size_y: size_y}
     }
 }
