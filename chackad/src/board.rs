@@ -69,7 +69,7 @@ impl Board {
     pub fn is_valid_tile(pos_x: isize, pos_y: isize) -> bool {
         if pos_x >= Self.size_x || pos_y >= Self.size_y || pos_x < 0 || pos_y < 0 {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
