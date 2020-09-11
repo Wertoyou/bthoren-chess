@@ -66,27 +66,27 @@ impl Board {
         }
     }
 
-    pub fn is_valid_tile(pos_x: isize, pos_y: isize) -> bool {
-        if pos_x >= Self.size_x || pos_y >= Self.size_y || pos_x < 0 || pos_y < 0 {
+    pub fn is_valid_tile(&self, pos_x: usize, pos_y: usize) -> bool {
+        if pos_x >= self.size_x || pos_y >= self.size_y{
             return false;
         } else {
             return true;
         }
     }
 
-    pub fn is_empty_tile(pos_x: usize, pos_y: usize) -> bool {
-        Self.tiles[pos_x][pos_y].is_empty
+    pub fn is_empty_tile(&self, pos_x: usize, pos_y: usize) -> bool {
+        self.tiles[pos_x][pos_y].is_empty
     }
 
-    fn set_emptines(pos_x: usize, pos_y: usize, to_empty: bool) {
-        Self.tiles[pos_x][pos_y].is_empty = to_empty;
+    pub fn set_emptiness(&mut self, pos_x: usize, pos_y: usize, to_empty: bool) {
+        self.tiles[pos_x][pos_y].is_empty = to_empty;
     }
 
-    fn set_piece_is_white(pos_x: usize, pos_y: usize, is_white: bool) {
-        Self.tiles[pos_x][pos_y].piece_is_white = is_white;
+    pub fn set_piece_is_white(&mut self, pos_x: usize, pos_y: usize, is_white: bool) {
+        self.tiles[pos_x][pos_y].piece_is_white = is_white;
     }
 
-    fn is_piece_white(pos_x: usize, pos_y: usize) -> bool {
-        Self.tiles[pos_x][pos_y].piece_is_white
+    pub fn is_piece_white(&self, pos_x: usize, pos_y: usize) -> bool {
+        self.tiles[pos_x][pos_y].piece_is_white
     }
 }

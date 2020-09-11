@@ -12,13 +12,13 @@ pub enum PieceType {
 
 pub struct Piece {
     piece_type: PieceType,
-    pos_x: isize,
-    pos_y: isize,
+    pos_x: usize,
+    pos_y: usize,
     is_white: bool,
 }
 
 impl Piece {
-    pub fn new(piece_type: PieceType, pos_x: isize, pos_y: isize, is_white: bool) -> Piece {
+    pub fn new(piece_type: PieceType, pos_x: usize, pos_y: usize, is_white: bool) -> Piece {
         Piece {
             piece_type: piece_type,
             pos_x: pos_x,
@@ -27,47 +27,46 @@ impl Piece {
         }
     }
 
-    fn move_now(to_x: isize, to_y: isize, board: &Board) {
+    fn move_now(&mut self, to_x: usize, to_y: usize, board: &mut Board) {
         board.set_emptiness(to_x, to_y, false);
-        board.set_emptiness(Self.pos_x, Self.pos_y, true);
-        Self.pos_x = to_x;
-        Self.pos_y = to_y;
-        board.set_piece_is_white(to_x, to_y, is_white);
+        board.set_emptiness(self.pos_x, self.pos_y, true);
+        self.pos_x = to_x;
+        self.pos_y = to_y;
+        board.set_piece_is_white(to_x, to_y, self.is_white);
     }
 
-    pub fn move_to(to_x: isize, to_y: isize, board: &Board) -> bool {
+    pub fn move_to(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
         if board.is_valid_tile(to_x, to_y) {
             return false;
         }
-        match Self.piece_type {
-            Pawn => return Self.move_pawn(to_x, to_y, board),
-            Rook => return Self.move_rook(to_x, to_y, board),
-            Knight => return Self.move_knight(to_x, to_y, board),
-            Bishop => return Self.move_bishop(to_x, to_y, board),
-            Queen => return Self.move_queen(to_x, to_y, board),
-            King => return Self.move_king(to_x, to_y, board),
-            _ => return false,
+        match &self.piece_type {
+            PieceType::Pawn => return self.move_pawn(to_x, to_y, board),
+            PieceType::Rook => return self.move_rook(to_x, to_y, board),
+            PieceType::Knight => return self.move_knight(to_x, to_y, board),
+            PieceType::Bishop => return self.move_bishop(to_x, to_y, board),
+            PieceType::Queen => return self.move_queen(to_x, to_y, board),
+            PieceType::King => return self.move_king(to_x, to_y, board),
         }
     }
-    fn move_pawn(to_x: isize, to_y: isize, board: &Board) -> bool {
-        if is_white {
+    fn move_pawn(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+        if self.is_white {
             // Regular move one step forward (including promotion)
-            if to_x == Self.pos_x && to_y == Self.pos_y + 1 {
+            if to_x == self.pos_x && to_y == self.pos_y + 1 {
                 if board.is_empty_tile(to_x, to_y) && to_y == board.size_y - 1 {
                     // TODO implement choose piece for promotion
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else if board.is_empty_tile(to_x, to_y) {
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
                 }
             }
             // Capture move
-            if to_y == Self.pos_y + 1 && (to_x == Self.pos_x - 1 || to_x == Self.pos_x + 1) {
-                if !board.is_empty_tile && !board.is_piece_white(to_x, to_y) {
-                    Self.move_now(to_x, to_y, board);
+            if to_y == self.pos_y + 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
+                if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) {
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -75,12 +74,12 @@ impl Piece {
             }
 
             // Double move
-            if to_x == Self.pos_x && to_y == Self.pos_y + 2 {
+            if to_x == self.pos_x && to_y == self.pos_y + 2 {
                 if board.is_empty_tile(to_x, to_y)
                     && board.is_empty_tile(to_x, to_y - 1)
-                    && pos_y == 1
+                    && self.pos_y == 1
                 {
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -88,22 +87,22 @@ impl Piece {
             }
         } else {
             // Regular move one step forward (including promotion)
-            if to_x == Self.pos_x && to_y == Self.pos_y - 1 {
+            if to_x == self.pos_x && to_y == self.pos_y - 1 {
                 if board.is_empty_tile(to_x, to_y) && to_y == 0 {
                     // TODO implement choose piece for promotion
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else if board.is_empty_tile(to_x, to_y) {
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
                 }
             }
             // Capture move
-            if to_y == Self.pos_y - 1 && (to_x == Self.pos_x - 1 || to_x == Self.pos_x + 1) {
-                if !board.is_empty_tile && board.is_piece_white(to_x, to_y) {
-                    Self.move_now(to_x, to_y, board);
+            if to_y == self.pos_y - 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
+                if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) {
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -111,12 +110,12 @@ impl Piece {
             }
 
             // Double move
-            if to_x == Self.pos_x && to_y == Self.pos_y - 2 {
+            if to_x == self.pos_x && to_y == self.pos_y - 2 {
                 if board.is_empty_tile(to_x, to_y)
                     && board.is_empty_tile(to_x, to_y - 1)
-                    && pos_y == board.size_y - 2
+                    && self.pos_y == board.size_y - 2
                 {
-                    Self.move_now(to_x, to_y, board);
+                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -127,14 +126,14 @@ impl Piece {
         false
     }
 
-    fn move_rook(to_x: isize, to_y: isize, board: &Board) -> bool {
-        if !board.is_empty_tile && board.is_piece_white == Self.is_white {
+    fn move_rook(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+        if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
 
-        if to_x == Self.pos_x && to_y != Self.pos_y {
-            for i in Self.pos_x..to_x {
-                if i == Self.pos_x {
+        if to_x == self.pos_x && to_y != self.pos_y {
+            for i in self.pos_x..to_x {
+                if i == self.pos_x {
                     continue;
                 } else {
                     if !board.is_empty_tile(to_x, i) {
@@ -142,13 +141,13 @@ impl Piece {
                     }
                 }
             }
-            move_now(to_x, to_y, board);
+            self.move_now(to_x, to_y, board);
             return true;
         }
 
-        if to_y == Self.pos_y && to_x != Self.pos_x {
-            for i in Self.pos_y..to_y {
-                if i == Self.pos_y {
+        if to_y == self.pos_y && to_x != self.pos_x {
+            for i in self.pos_y..to_y {
+                if i == self.pos_y {
                     continue;
                 } else {
                     if !board.is_empty_tile(i, to_y) {
@@ -156,21 +155,27 @@ impl Piece {
                     }
                 }
             }
-            move_now(to_x, to_y, board);
+            self.move_now(to_x, to_y, board);
             return true;
         }
 
         false
     }
 
-    fn move_knight(to_x: isize, to_y: isize, board: &Board) -> bool {
+    fn move_knight(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
         //TODO implement
+        false
     }
-    fn move_bishop(to_x: isize, to_y: isize, board: &Board) -> bool {}
-    fn move_queen(to_x: isize, to_y: isize, board: &Board) -> bool {
+    fn move_bishop(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
         //TODO implement
+        false
     }
-    fn move_king(to_x: isize, to_y: isize, board: &Board) -> bool {
+    fn move_queen(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
         //TODO implement
+        false
+    }
+    fn move_king(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+        //TODO implement
+        false
     }
 }
