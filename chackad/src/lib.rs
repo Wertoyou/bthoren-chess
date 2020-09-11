@@ -1,8 +1,10 @@
 mod board;
+mod piece;
 
 #[cfg(test)]
 mod tests {
     use crate::board::Board;
+    use crate::piece;
 
     #[test]
     fn board_size_x_valid() {
@@ -34,5 +36,13 @@ mod tests {
     #[should_panic]
     fn board_size_y_invalid() {
         let _board: Board = Board::new(1, 0);
+    }
+
+    #[test]
+    fn test_pawn_forward() {
+        let mut board = Board::new(8, 8);
+        let mut pawn1 = piece::Piece::new(piece::PieceType::Pawn, 0, 1, true);
+        pawn1.move_to(0, 2, &mut board);
+        let mut pawn2 = piece::Piece::new(piece::PieceType::Pawn, 0, 1, true);
     }
 }
