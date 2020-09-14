@@ -1,6 +1,7 @@
 // TODO create better logic for seperating White/Black case for pawns (now it is almost duplicate code)
 use crate::board::Board;
 
+#[derive(PartialEq)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -18,7 +19,14 @@ pub struct Piece {
 }
 
 impl Piece {
-    pub fn new(piece_type: PieceType, pos_x: usize, pos_y: usize, is_white: bool) -> Piece {
+    pub fn new(
+        board: &mut Board,
+        piece_type: PieceType,
+        pos_x: usize,
+        pos_y: usize,
+        is_white: bool,
+    ) -> Piece {
+        board.set_emptiness(pos_x, pos_y, false);
         Piece {
             piece_type: piece_type,
             pos_x: pos_x,
@@ -35,12 +43,18 @@ impl Piece {
         board.set_piece_is_white(to_x, to_y, self.is_white);
     }
 
-    pub fn move_to(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    pub fn move_to(
+        &mut self,
+        to_x: usize,
+        to_y: usize,
+        board: &mut Board,
+        promotion: PieceType,
+    ) -> bool {
         if board.is_valid_tile(to_x, to_y) {
             return false;
         }
         match &self.piece_type {
-            PieceType::Pawn => return self.move_pawn(to_x, to_y, board),
+            PieceType::Pawn => return self.move_pawn(to_x, to_y, board, promotion),
             PieceType::Rook => return self.move_rook(to_x, to_y, board),
             PieceType::Knight => return self.move_knight(to_x, to_y, board),
             PieceType::Bishop => return self.move_bishop(to_x, to_y, board),
@@ -48,17 +62,26 @@ impl Piece {
             PieceType::King => return self.move_king(to_x, to_y, board),
         }
     }
-    fn move_pawn(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn move_pawn(
+        &mut self,
+        to_x: usize,
+        to_y: usize,
+        board: &mut Board,
+        promotion: PieceType,
+    ) -> bool {
         if self.is_white {
             // Regular move one step forward (including promotion)
             if to_x == self.pos_x && to_y == self.pos_y + 1 {
                 if board.is_empty_tile(to_x, to_y) && to_y == board.size_y - 1 {
-                    // TODO implement choose piece for promotion
+                    if promotion == PieceType::Pawn || promotion == PieceType::King {
+                        return false;
+                    }
+                    self.piece_type = promotion;
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else if board.is_empty_tile(to_x, to_y) {
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else {
                     return false;
                 }
@@ -67,7 +90,7 @@ impl Piece {
             if to_y == self.pos_y + 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) {
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else {
                     return false;
                 }
@@ -80,7 +103,7 @@ impl Piece {
                     && self.pos_y == 1
                 {
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else {
                     return false;
                 }
@@ -89,12 +112,15 @@ impl Piece {
             // Regular move one step forward (including promotion)
             if to_x == self.pos_x && to_y == self.pos_y - 1 {
                 if board.is_empty_tile(to_x, to_y) && to_y == 0 {
-                    // TODO implement choose piece for promotion
+                    if promotion == PieceType::Pawn || promotion == PieceType::King {
+                        return false;
+                    }
+                    self.piece_type = promotion;
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else if board.is_empty_tile(to_x, to_y) {
                     self.move_now(to_x, to_y, board);
-                    return true; //No error TODO fix with rust things
+                    return true;
                 } else {
                     return false;
                 }

@@ -41,22 +41,22 @@ mod tests {
     #[test]
     fn test_pawn_forward() {
         let mut board = Board::new(8, 8);
-        let mut pawn = piece::Piece::new(piece::PieceType::Pawn, 0, 1, true);
-        pawn.move_to(0, 2, &mut board);
+        let mut pawn = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
+        pawn.move_to(0, 2, &mut board, piece::PieceType::Queen);
     }
 
     #[test]
     fn test_pawn_forward2() {
         let mut board = Board::new(8, 8);
-        let mut pawn = piece::Piece::new(piece::PieceType::Pawn, 0, 1, true);
-        pawn.move_to(0, 3, &mut board);
+        let mut pawn = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
+        pawn.move_to(0, 3, &mut board, piece::PieceType::Queen);
     }
 
     #[test]
     fn test_pawn_capture() {
         let mut board = Board::new(8, 8);
-        let mut pawn1 = piece::Piece::new(piece::PieceType::Pawn, 0, 1, true);
-        let mut pawn2 = piece::Piece::new(piece::PieceType::Pawn, 1, 2, true);
-        pawn1.move_to(1, 2, &mut board);
+        let mut pawn1 = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
+        let mut pawn2 = piece::Piece::new(&mut board, piece::PieceType::Pawn, 1, 2, true);
+        pawn1.move_to(1, 2, &mut board, piece::PieceType::Queen);
     }
 }
