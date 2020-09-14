@@ -72,7 +72,22 @@ impl Game {
         for a in self.all_pieces.iter() {
             for i in 0..self.board.size_x {
                 for j in 0..self.board.size_y {
+                    if a.check_to(i, j, &self.board, PieceType::Pawn) {
+                        self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
+                    }
+                    if a.check_to(i, j, &self.board, PieceType::Rook) {
+                        self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
+                    }
+                    if a.check_to(i, j, &self.board, PieceType::Knight) {
+                        self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
+                    }
+                    if a.check_to(i, j, &self.board, PieceType::Bishop) {
+                        self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
+                    }
                     if a.check_to(i, j, &self.board, PieceType::Queen) {
+                        self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
+                    }
+                    if a.check_to(i, j, &self.board, PieceType::King) {
                         self.all_moves.insert((a.pos_x, a.pos_y), (i, j));
                     }
                 }
