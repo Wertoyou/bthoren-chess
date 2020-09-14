@@ -1,9 +1,11 @@
 mod board;
+mod game;
 mod piece;
 
 #[cfg(test)]
 mod tests {
     use crate::board::Board;
+    use crate::game::Game;
     use crate::piece;
 
     #[test]
@@ -42,14 +44,14 @@ mod tests {
     fn test_pawn_forward() {
         let mut board = Board::new(8, 8);
         let mut pawn = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
-        pawn.move_to(0, 2, &mut board, piece::PieceType::Queen);
+        pawn.check_to(0, 2, &mut board, piece::PieceType::Queen);
     }
 
     #[test]
     fn test_pawn_forward2() {
         let mut board = Board::new(8, 8);
         let mut pawn = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
-        pawn.move_to(0, 3, &mut board, piece::PieceType::Queen);
+        pawn.check_to(0, 3, &mut board, piece::PieceType::Queen);
     }
 
     #[test]
@@ -57,6 +59,18 @@ mod tests {
         let mut board = Board::new(8, 8);
         let mut pawn1 = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 1, true);
         let mut pawn2 = piece::Piece::new(&mut board, piece::PieceType::Pawn, 1, 2, true);
-        pawn1.move_to(1, 2, &mut board, piece::PieceType::Queen);
+        pawn1.check_to(1, 2, &mut board, piece::PieceType::Queen);
+    }
+
+    #[test]
+    fn test_pawn_promotion() {
+        let mut board = Board::new(8, 8);
+        let mut pawn1 = piece::Piece::new(&mut board, piece::PieceType::Pawn, 0, 6, true);
+        pawn1.check_to(0, 7, &mut board, piece::PieceType::Queen);
+    }
+
+    #[test]
+    fn create_game() {
+        Game::new();
     }
 }

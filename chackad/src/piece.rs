@@ -1,7 +1,7 @@
 // TODO create better logic for seperating White/Black case for pawns (now it is almost duplicate code)
 use crate::board::Board;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -11,11 +11,12 @@ pub enum PieceType {
     King,
 }
 
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct Piece {
-    piece_type: PieceType,
-    pos_x: usize,
-    pos_y: usize,
-    is_white: bool,
+    pub piece_type: PieceType,
+    pub pos_x: usize,
+    pub pos_y: usize,
+    pub is_white: bool,
 }
 
 impl Piece {
@@ -35,40 +36,29 @@ impl Piece {
         }
     }
 
-    fn move_now(&mut self, to_x: usize, to_y: usize, board: &mut Board) {
+    fn move_to(&mut self, to_x: usize, to_y: usize, board: &mut Board, promotion: PieceType) {
         board.set_emptiness(to_x, to_y, false);
         board.set_emptiness(self.pos_x, self.pos_y, true);
         self.pos_x = to_x;
         self.pos_y = to_y;
+        self.piece_type = promotion;
         board.set_piece_is_white(to_x, to_y, self.is_white);
     }
 
-    pub fn move_to(
-        &mut self,
-        to_x: usize,
-        to_y: usize,
-        board: &mut Board,
-        promotion: PieceType,
-    ) -> bool {
+    pub fn check_to(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
         if board.is_valid_tile(to_x, to_y) {
             return false;
         }
         match &self.piece_type {
-            PieceType::Pawn => return self.move_pawn(to_x, to_y, board, promotion),
-            PieceType::Rook => return self.move_rook(to_x, to_y, board),
-            PieceType::Knight => return self.move_knight(to_x, to_y, board),
-            PieceType::Bishop => return self.move_bishop(to_x, to_y, board),
-            PieceType::Queen => return self.move_queen(to_x, to_y, board),
-            PieceType::King => return self.move_king(to_x, to_y, board),
+            PieceType::Pawn => return self.check_pawn(to_x, to_y, board, promotion),
+            PieceType::Rook => return self.check_rook(to_x, to_y, board),
+            PieceType::Knight => return self.check_knight(to_x, to_y, board),
+            PieceType::Bishop => return self.check_bishop(to_x, to_y, board),
+            PieceType::Queen => return self.check_queen(to_x, to_y, board),
+            PieceType::King => return self.check_king(to_x, to_y, board),
         }
     }
-    fn move_pawn(
-        &mut self,
-        to_x: usize,
-        to_y: usize,
-        board: &mut Board,
-        promotion: PieceType,
-    ) -> bool {
+    fn check_pawn(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
         if self.is_white {
             // Regular move one step forward (including promotion)
             if to_x == self.pos_x && to_y == self.pos_y + 1 {
@@ -76,11 +66,8 @@ impl Piece {
                     if promotion == PieceType::Pawn || promotion == PieceType::King {
                         return false;
                     }
-                    self.piece_type = promotion;
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else if board.is_empty_tile(to_x, to_y) {
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else {
                     return false;
@@ -89,7 +76,6 @@ impl Piece {
             // Capture move
             if to_y == self.pos_y + 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) {
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else {
                     return false;
@@ -102,7 +88,6 @@ impl Piece {
                     && board.is_empty_tile(to_x, to_y - 1)
                     && self.pos_y == 1
                 {
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else {
                     return false;
@@ -115,11 +100,8 @@ impl Piece {
                     if promotion == PieceType::Pawn || promotion == PieceType::King {
                         return false;
                     }
-                    self.piece_type = promotion;
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else if board.is_empty_tile(to_x, to_y) {
-                    self.move_now(to_x, to_y, board);
                     return true;
                 } else {
                     return false;
@@ -128,7 +110,6 @@ impl Piece {
             // Capture move
             if to_y == self.pos_y - 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) {
-                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -141,7 +122,6 @@ impl Piece {
                     && board.is_empty_tile(to_x, to_y - 1)
                     && self.pos_y == board.size_y - 2
                 {
-                    self.move_now(to_x, to_y, board);
                     return true; //No error TODO fix with rust things
                 } else {
                     return false;
@@ -152,7 +132,7 @@ impl Piece {
         false
     }
 
-    fn move_rook(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn check_rook(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
         if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
@@ -167,7 +147,6 @@ impl Piece {
                     }
                 }
             }
-            self.move_now(to_x, to_y, board);
             return true;
         }
 
@@ -181,26 +160,25 @@ impl Piece {
                     }
                 }
             }
-            self.move_now(to_x, to_y, board);
             return true;
         }
 
         false
     }
 
-    fn move_knight(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn check_knight(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
         //TODO implement
         false
     }
-    fn move_bishop(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn check_bishop(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
         //TODO implement
         false
     }
-    fn move_queen(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn check_queen(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
         //TODO implement
         false
     }
-    fn move_king(&mut self, to_x: usize, to_y: usize, board: &mut Board) -> bool {
+    fn check_king(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
         //TODO implement
         false
     }
