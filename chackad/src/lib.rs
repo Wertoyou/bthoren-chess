@@ -70,7 +70,14 @@ mod tests {
     }
 
     #[test]
-    fn create_game() {
-        Game::new();
+    fn create_regular_game() {
+        let mut game = Game::new();
+        game.regular_chess_setup();
+    }
+
+    #[test]
+    fn make_moves_in_game() {
+        let mut game = Game::new();
+        game.regular_chess_setup();
     }
 }

@@ -138,8 +138,8 @@ impl Piece {
         }
 
         if to_x == self.pos_x && to_y != self.pos_y {
-            for i in self.pos_x..to_x {
-                if i == self.pos_x {
+            for i in self.pos_y..to_y {
+                if i == self.pos_y {
                     continue;
                 } else {
                     if !board.is_empty_tile(to_x, i) {
@@ -151,8 +151,8 @@ impl Piece {
         }
 
         if to_y == self.pos_y && to_x != self.pos_x {
-            for i in self.pos_y..to_y {
-                if i == self.pos_y {
+            for i in self.pos_x..to_x {
+                if i == self.pos_x {
                     continue;
                 } else {
                     if !board.is_empty_tile(i, to_y) {
@@ -167,19 +167,60 @@ impl Piece {
     }
 
     fn check_knight(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
-        //TODO implement
+        if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) == self.is_white {
+            if (to_x as i128 - self.pos_x as i128).abs() == 2
+                && (to_y as i128 - self.pos_y as i128).abs() == 1
+            {
+                return true;
+            }
+            if (to_y as i128 - self.pos_y as i128).abs() == 2
+                && (to_x as i128 - self.pos_x as i128).abs() == 1
+            {
+                return true;
+            }
+        }
         false
     }
     fn check_bishop(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
-        //TODO implement
+        if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
+            return false;
+        }
+
+        if (to_x as i128 - self.pos_x as i128) != (to_y as i128 - self.pos_y as i128) {
+            return false;
+        }
+
+        if self.pos_x != to_x && self.pos_y != to_y {
+            for (i, j) in (self.pos_x..to_x).zip(self.pos_y..to_y) {
+                if i == self.pos_x && j == self.pos_y {
+                    continue;
+                } else {
+                    if !board.is_empty_tile(i, j) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
         false
     }
+
     fn check_queen(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
-        //TODO implement
+        if self.check_bishop(to_x, to_y, board) || self.check_rook(to_x, to_y, board) {
+            return true;
+        }
         false
     }
     fn check_king(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
-        //TODO implement
+        if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
+            return false;
+        }
+        if (to_x as i128 - self.pos_x as i128).abs() == 1
+            || (to_y as i128 - self.pos_y as i128).abs() == 1
+        {
+            return true;
+        }
         false
     }
 }
