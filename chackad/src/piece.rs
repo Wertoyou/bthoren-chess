@@ -48,7 +48,7 @@ impl Piece {
     }
 
     pub fn check_to(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
-        if board.is_valid_tile(to_x, to_y) {
+        if !board.is_valid_tile(to_x, to_y) {
             return false;
         }
         match &self.piece_type {
@@ -81,7 +81,7 @@ impl Piece {
             }
 
             // Capture move
-            if to_y == self.pos_y + 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
+            if to_y == self.pos_y + 1 && (to_x + 1 == self.pos_x || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) {
                     return true;
                 } else {
@@ -102,7 +102,7 @@ impl Piece {
             }
         } else {
             // Regular move one step forward (including promotion)
-            if to_x == self.pos_x && to_y == self.pos_y - 1 {
+            if to_x == self.pos_x && to_y + 1 == self.pos_y {
                 if board.is_empty_tile(to_x, to_y) && to_y == 0 {
                     if promotion == PieceType::Pawn || promotion == PieceType::King {
                         return false;
@@ -120,7 +120,7 @@ impl Piece {
             }
 
             // Capture move
-            if to_y == self.pos_y - 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
+            if to_y + 1 == self.pos_y && (to_x + 1 == self.pos_x || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) {
                     return true; //No error TODO fix with rust things
                 } else {
@@ -129,7 +129,7 @@ impl Piece {
             }
 
             // Double move
-            if to_x == self.pos_x && to_y == self.pos_y - 2 {
+            if to_x == self.pos_x && to_y + 2 == self.pos_y {
                 if board.is_empty_tile(to_x, to_y)
                     && board.is_empty_tile(to_x, to_y - 1)
                     && self.pos_y == board.size_y - 2
