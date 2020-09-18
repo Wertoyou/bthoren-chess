@@ -243,4 +243,35 @@ impl Game {
             }
         }
     }
+
+    pub fn get_coords_from_string(s: String) -> (usize, usize) {
+        if s.len() > 2 {
+            panic!("string with only two caracters supported");
+        }
+
+        let c: char = s.chars().nth(0).unwrap();
+        let n: char = s.chars().nth(1).unwrap();
+
+        if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+            panic!("first character in string must be a-z");
+        }
+
+        if !(n >= '1' && n <= '9') {
+            panic!("second character must be 1-9");
+        }
+
+        if c >= 'a' && c <= 'z' {
+            return (c as usize - 'a' as usize, n as usize - '1' as usize);
+        } else {
+            return (c as usize - 'A' as usize, n as usize - '1' as usize);
+        }
+    }
+
+    pub fn get_string_from_coords(x: usize, y: usize) -> String {
+        format!(
+            "{}{}",
+            (x + 'a' as usize) as u8 as char,
+            (y + '1' as usize) as u8 as char
+        )
+    }
 }
