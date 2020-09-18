@@ -1,9 +1,11 @@
 mod tile {
+    #[derive(Clone)]
     pub enum Color {
         Black,
         White,
     }
 
+    #[derive(Clone)]
     pub struct Tile {
         pub color: Color,
 
@@ -11,9 +13,11 @@ mod tile {
         pub pos_y: usize,
         pub is_empty: bool,
         pub piece_is_white: bool,
+        pub has_orig_piece: bool,
     }
 }
 
+#[derive(Clone)]
 pub struct Board {
     tiles: Vec<Vec<tile::Tile>>,
     pub size_x: usize,
@@ -43,6 +47,7 @@ impl Board {
                         pos_y: j,
                         is_empty: true,
                         piece_is_white: false,
+                        has_orig_piece: true,
                     };
                 } else {
                     next = tile::Tile {
@@ -51,6 +56,7 @@ impl Board {
                         pos_y: j,
                         is_empty: true,
                         piece_is_white: false,
+                        has_orig_piece: true,
                     };
                 }
 
@@ -119,5 +125,13 @@ impl Board {
             (x + 'a' as usize) as u8 as char,
             (y + '1' as usize) as u8 as char
         )
+    }
+
+    pub fn false_orig_piece(&mut self, x: usize, y: usize) {
+        self.tiles[x][y].has_orig_piece = false;
+    }
+
+    pub fn check_orig(&self, x: usize, y: usize) -> bool {
+        self.tiles[x][y].has_orig_piece
     }
 }

@@ -1,7 +1,7 @@
 // TODO create better logic for seperating White/Black case for pawns (now it is almost duplicate code)
 use crate::board::Board;
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 pub enum PieceType {
     Pawn,
     Rook,
@@ -11,7 +11,7 @@ pub enum PieceType {
     King,
 }
 
-#[derive(PartialEq, Eq, Hash, Debug)]
+#[derive(PartialEq, Eq, Hash, Debug, Clone)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub pos_x: usize,
@@ -36,9 +36,11 @@ impl Piece {
         }
     }
 
-    fn move_to(&mut self, to_x: usize, to_y: usize, board: &mut Board, promotion: PieceType) {
+    pub fn move_to(&mut self, to_x: usize, to_y: usize, board: &mut Board, promotion: PieceType) {
         board.set_emptiness(to_x, to_y, false);
         board.set_emptiness(self.pos_x, self.pos_y, true);
+        board.false_orig_piece(self.pos_x, self.pos_y);
+        board.false_orig_piece(to_x, to_y);
         self.pos_x = to_x;
         self.pos_y = to_y;
         self.piece_type = promotion;
@@ -51,11 +53,11 @@ impl Piece {
         }
         match &self.piece_type {
             PieceType::Pawn => return self.check_pawn(to_x, to_y, board, promotion),
-            PieceType::Rook => return self.check_rook(to_x, to_y, board),
-            PieceType::Knight => return self.check_knight(to_x, to_y, board),
-            PieceType::Bishop => return self.check_bishop(to_x, to_y, board),
-            PieceType::Queen => return self.check_queen(to_x, to_y, board),
-            PieceType::King => return self.check_king(to_x, to_y, board),
+            PieceType::Rook => return self.check_rook(to_x, to_y, board, promotion),
+            PieceType::Knight => return self.check_knight(to_x, to_y, board, promotion),
+            PieceType::Bishop => return self.check_bishop(to_x, to_y, board, promotion),
+            PieceType::Queen => return self.check_queen(to_x, to_y, board, promotion),
+            PieceType::King => return self.check_king(to_x, to_y, board, promotion),
         }
     }
     fn check_pawn(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
@@ -67,12 +69,17 @@ impl Piece {
                         return false;
                     }
                     return true;
-                } else if board.is_empty_tile(to_x, to_y) {
+                } else if board.is_empty_tile(to_x, to_y) && promotion == PieceType::Pawn {
                     return true;
                 } else {
                     return false;
                 }
             }
+
+            if promotion != PieceType::Pawn {
+                return false;
+            }
+
             // Capture move
             if to_y == self.pos_y + 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) {
@@ -101,12 +108,17 @@ impl Piece {
                         return false;
                     }
                     return true;
-                } else if board.is_empty_tile(to_x, to_y) {
+                } else if board.is_empty_tile(to_x, to_y) && promotion == PieceType::Pawn {
                     return true;
                 } else {
                     return false;
                 }
             }
+
+            if promotion != PieceType::Pawn {
+                return false;
+            }
+
             // Capture move
             if to_y == self.pos_y - 1 && (to_x == self.pos_x - 1 || to_x == self.pos_x + 1) {
                 if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) {
@@ -132,7 +144,10 @@ impl Piece {
         false
     }
 
-    fn check_rook(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
+    fn check_rook(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
+        if promotion != PieceType::Rook {
+            return false;
+        }
         if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
@@ -166,7 +181,10 @@ impl Piece {
         false
     }
 
-    fn check_knight(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
+    fn check_knight(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
+        if promotion != PieceType::Knight {
+            return false;
+        }
         if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) == self.is_white {
             if (to_x as i128 - self.pos_x as i128).abs() == 2
                 && (to_y as i128 - self.pos_y as i128).abs() == 1
@@ -181,7 +199,10 @@ impl Piece {
         }
         false
     }
-    fn check_bishop(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
+    fn check_bishop(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
+        if promotion != PieceType::Bishop {
+            return false;
+        }
         if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
@@ -206,18 +227,40 @@ impl Piece {
         false
     }
 
-    fn check_queen(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
-        if self.check_bishop(to_x, to_y, board) || self.check_rook(to_x, to_y, board) {
+    fn check_queen(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
+        if promotion != PieceType::Queen {
+            return false;
+        }
+        if self.check_bishop(to_x, to_y, board, PieceType::Bishop)
+            || self.check_rook(to_x, to_y, board, PieceType::Rook)
+        {
             return true;
         }
         false
     }
-    fn check_king(&self, to_x: usize, to_y: usize, board: &Board) -> bool {
+    fn check_king(&self, to_x: usize, to_y: usize, board: &Board, promotion: PieceType) -> bool {
+        if promotion != PieceType::King {
+            return false;
+        }
         if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
         if (to_x as i128 - self.pos_x as i128).abs() == 1
             || (to_y as i128 - self.pos_y as i128).abs() == 1
+        {
+            return true;
+        }
+        if to_x == self.pos_x + 2
+            && to_y == self.pos_y
+            && board.check_orig(self.pos_x, self.pos_y)
+            && board.check_orig(board.size_x - 1, to_y)
+        {
+            return true;
+        }
+        if to_x == self.pos_x - 2
+            && to_y == self.pos_y
+            && board.check_orig(self.pos_x, self.pos_y)
+            && board.check_orig(0, to_y)
         {
             return true;
         }
