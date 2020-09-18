@@ -3,6 +3,7 @@ use crate::piece::Piece;
 use crate::piece::PieceType;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::io;
 
 pub struct Game {
     white_pieces: HashSet<Piece>,
@@ -273,5 +274,39 @@ impl Game {
             (x + 'a' as usize) as u8 as char,
             (y + '1' as usize) as u8 as char
         )
+    }
+
+    pub fn start(&mut self) {
+        self.regular_chess_setup();
+        self.calc_all_moves();
+        while !self.all_moves.is_empty() {
+            self.calc_all_moves();
+            println!("next move?");
+            let stdin = io::stdin();
+            let mut input = String::new();
+
+            stdin.read_line(&mut input).unwrap();
+
+            let v: Vec<&str> = input.split_whitespace().collect();
+            let mut tmp = PieceType::Pawn;
+            match v[2] {
+                "Pawn" => tmp = PieceType::Pawn,
+                "Rook" => tmp = PieceType::Rook,
+                "Knight" => tmp = PieceType::Knight,
+                "Bishop" => tmp = PieceType::Bishop,
+                "Queen" => tmp = PieceType::Queen,
+                "King" => tmp = PieceType::King,
+                _ => println!("unknown piece"),
+            }
+
+            let first = Game::get_coords_from_string(v[0].to_string());
+            let second = (
+                Game::get_coords_from_string(v[1].to_string()).0,
+                Game::get_coords_from_string(v[1].to_string()).1,
+                tmp,
+            );
+
+            self.next(first, second);
+        }
     }
 }
