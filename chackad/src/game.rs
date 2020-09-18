@@ -308,5 +308,6 @@ impl Game {
 
             self.next(first, second);
         }
+        println!("Checkmate");
     }
 }

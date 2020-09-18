@@ -80,4 +80,10 @@ mod tests {
         let mut game = Game::new();
         game.regular_chess_setup();
     }
+
+    #[test]
+    fn run_game() {
+        let mut game = Game::new();
+        game.start();
+    }
 }
