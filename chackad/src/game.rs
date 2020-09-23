@@ -75,7 +75,7 @@ impl Game {
     }
 
     fn calc_all_moves(&mut self) {
-        self.all_moves = HashMap::new();
+        self.all_moves.clear();
         let turn = if self.whites_turn {
             &self.white_pieces
         } else {
