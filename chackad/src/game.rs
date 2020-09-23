@@ -227,6 +227,26 @@ impl Game {
         }
     }
 
+    pub fn moves_from(&self, from: (usize, usize)) -> Option<&Vec<(usize, usize, PieceType)>> {
+        self.all_moves.get(&from)
+    }
+
+    pub fn white_pieces_iter(&self) -> std::collections::hash_set::Iter<'_, Piece> {
+        self.white_pieces.iter()
+    }
+
+    pub fn black_pieces_iter(&self) -> std::collections::hash_set::Iter<'_, Piece> {
+        self.black_pieces.iter()
+    }
+
+    pub fn is_whites_turn(&self) -> bool {
+        self.whites_turn
+    }
+
+    pub fn board(&self) -> &Board {
+        &self.board
+    }
+
     pub fn next(&mut self, from: (usize, usize), to: (usize, usize, PieceType)) {
         self.calc_all_moves();
         if self.all_moves.contains_key(&from) {
