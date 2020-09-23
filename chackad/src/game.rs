@@ -70,6 +70,8 @@ impl Game {
             .insert(Piece::new(&mut self.board, PieceType::Knight, 6, 7, false));
         self.black_pieces
             .insert(Piece::new(&mut self.board, PieceType::Rook, 7, 7, false));
+
+        self.calc_all_moves();
     }
 
     fn calc_all_moves(&mut self) {
