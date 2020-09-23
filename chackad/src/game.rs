@@ -76,13 +76,12 @@ impl Game {
 
     fn calc_all_moves(&mut self) {
         self.all_moves = HashMap::new();
-        let mut turn = &HashSet::new();
-
-        if self.whites_turn {
-            turn = &self.white_pieces;
+        let turn = if self.whites_turn {
+            &self.white_pieces
         } else {
-            turn = &self.black_pieces;
-        }
+            &self.black_pieces
+        };
+
         for a in turn.iter() {
             for i in 0..self.board.size_x {
                 for j in 0..self.board.size_y {
@@ -131,16 +130,11 @@ impl Game {
     }
 
     fn remove_checks(&self) -> HashMap<(usize, usize), Vec<(usize, usize, PieceType)>> {
-        let mut turn = &HashSet::new();
-        let mut turn_next = &HashSet::new();
-
-        if self.whites_turn {
-            turn = &self.white_pieces;
-            turn_next = &self.black_pieces;
+        let (turn, turn_next) = if self.whites_turn {
+            (&self.white_pieces, &self.black_pieces)
         } else {
-            turn = &self.black_pieces;
-            turn_next = &self.white_pieces;
-        }
+            (&self.black_pieces, &self.white_pieces)
+        };
 
         let mut out: HashMap<(usize, usize), Vec<(usize, usize, PieceType)>> = HashMap::new();
 
