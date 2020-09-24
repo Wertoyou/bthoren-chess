@@ -28,6 +28,7 @@ impl Piece {
         is_white: bool,
     ) -> Piece {
         board.set_emptiness(pos_x, pos_y, false);
+        board.set_piece_is_white(pos_x, pos_y, is_white);
         Piece {
             piece_type: piece_type,
             pos_x: pos_x,
