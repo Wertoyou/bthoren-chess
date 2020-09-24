@@ -161,7 +161,7 @@ impl event::EventHandler for GameState {
             graphics::DrawParam::new().scale([self.scale_factor, self.scale_factor]);
 
         // Draw the chessboard
-        graphics::draw(ctx, &self.assets.chessboard, graphics::DrawParam::new())?;
+        graphics::draw(ctx, &self.assets.chessboard, texture_draw_param)?;
 
         // Draw selected tile
         if let Some(tile) = self.selected_tile {
