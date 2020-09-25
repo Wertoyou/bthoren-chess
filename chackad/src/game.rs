@@ -70,17 +70,18 @@ impl Game {
             .insert(Piece::new(&mut self.board, PieceType::Knight, 6, 7, false));
         self.black_pieces
             .insert(Piece::new(&mut self.board, PieceType::Rook, 7, 7, false));
+
+        self.calc_all_moves();
     }
 
     fn calc_all_moves(&mut self) {
-        self.all_moves = HashMap::new();
-        let mut turn = &HashSet::new();
-
-        if self.whites_turn {
-            turn = &self.white_pieces;
+        self.all_moves.clear();
+        let turn = if self.whites_turn {
+            &self.white_pieces
         } else {
-            turn = &self.black_pieces;
-        }
+            &self.black_pieces
+        };
+
         for a in turn.iter() {
             for i in 0..self.board.size_x {
                 for j in 0..self.board.size_y {
@@ -129,16 +130,11 @@ impl Game {
     }
 
     fn remove_checks(&self) -> HashMap<(usize, usize), Vec<(usize, usize, PieceType)>> {
-        let mut turn = &HashSet::new();
-        let mut turn_next = &HashSet::new();
-
-        if self.whites_turn {
-            turn = &self.white_pieces;
-            turn_next = &self.black_pieces;
+        let (turn, turn_next) = if self.whites_turn {
+            (&self.white_pieces, &self.black_pieces)
         } else {
-            turn = &self.black_pieces;
-            turn_next = &self.white_pieces;
-        }
+            (&self.black_pieces, &self.white_pieces)
+        };
 
         let mut out: HashMap<(usize, usize), Vec<(usize, usize, PieceType)>> = HashMap::new();
 
@@ -229,6 +225,26 @@ impl Game {
                 self.black_pieces.insert(a);
             }
         }
+    }
+
+    pub fn moves_from(&self, from: (usize, usize)) -> Option<&Vec<(usize, usize, PieceType)>> {
+        self.all_moves.get(&from)
+    }
+
+    pub fn white_pieces_iter(&self) -> std::collections::hash_set::Iter<'_, Piece> {
+        self.white_pieces.iter()
+    }
+
+    pub fn black_pieces_iter(&self) -> std::collections::hash_set::Iter<'_, Piece> {
+        self.black_pieces.iter()
+    }
+
+    pub fn is_whites_turn(&self) -> bool {
+        self.whites_turn
+    }
+
+    pub fn board(&self) -> &Board {
+        &self.board
     }
 
     pub fn next(&mut self, from: (usize, usize), to: (usize, usize, PieceType)) {
