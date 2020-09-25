@@ -250,7 +250,7 @@ impl Game {
     pub fn no_moves(&self) -> bool {
         self.all_moves.is_empty()
     }
-
+  
     pub fn next(&mut self, from: (usize, usize), to: (usize, usize, PieceType)) {
         if self.all_moves.contains_key(&from) {
             if self
