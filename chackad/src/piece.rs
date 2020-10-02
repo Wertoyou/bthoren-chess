@@ -132,8 +132,8 @@ impl Piece {
             // Double move
             if to_x == self.pos_x && to_y + 2 == self.pos_y {
                 if board.is_empty_tile(to_x, to_y)
-                    && board.is_empty_tile(to_x, to_y - 1)
-                    && self.pos_y == board.size_y - 2
+                    && board.is_empty_tile(to_x, to_y + 1)
+                    && self.pos_y == 6
                 {
                     return true; //No error TODO fix with rust things
                 } else {
@@ -154,12 +154,24 @@ impl Piece {
         }
 
         if to_x == self.pos_x && to_y != self.pos_y {
-            for i in self.pos_y..to_y {
-                if i == self.pos_y {
-                    continue;
-                } else {
-                    if !board.is_empty_tile(to_x, i) {
-                        return false;
+            if self.pos_y < to_y {
+                for i in self.pos_y..to_y {
+                    if i == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(to_x, i) {
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                for i in (to_y..self.pos_y).rev() {
+                    if i == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(to_x, i) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -167,12 +179,24 @@ impl Piece {
         }
 
         if to_y == self.pos_y && to_x != self.pos_x {
-            for i in self.pos_x..to_x {
-                if i == self.pos_x {
-                    continue;
-                } else {
-                    if !board.is_empty_tile(i, to_y) {
-                        return false;
+            if self.pos_x < to_x {
+                for i in self.pos_x..to_x {
+                    if i == self.pos_x {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(to_x, i) {
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                for i in (to_x..self.pos_x).rev() {
+                    if i == self.pos_x {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(to_x, i) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -186,7 +210,7 @@ impl Piece {
         if promotion != PieceType::Knight {
             return false;
         }
-        if !board.is_empty_tile(to_x, to_y) && !board.is_piece_white(to_x, to_y) == self.is_white {
+        if board.is_empty_tile(to_x, to_y) || board.is_piece_white(to_x, to_y) != self.is_white {
             if (to_x as i128 - self.pos_x as i128).abs() == 2
                 && (to_y as i128 - self.pos_y as i128).abs() == 1
             {
@@ -208,17 +232,48 @@ impl Piece {
             return false;
         }
 
-        if (to_x as i128 - self.pos_x as i128) != (to_y as i128 - self.pos_y as i128) {
-            return false;
-        }
-
+        //if (to_x as i128 - self.pos_x as i128) != (to_y as i128 - self.pos_y as i128) {
+        //    return false;
+        //}
         if self.pos_x != to_x && self.pos_y != to_y {
-            for (i, j) in (self.pos_x..to_x).zip(self.pos_y..to_y) {
-                if i == self.pos_x && j == self.pos_y {
-                    continue;
-                } else {
-                    if !board.is_empty_tile(i, j) {
-                        return false;
+            if self.pos_x < to_x && self.pos_y < to_y {
+                for (i, j) in (self.pos_x..to_x).zip(self.pos_y..to_y) {
+                    if i == self.pos_x && j == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(i, j) {
+                            return false;
+                        }
+                    }
+                }
+            } else if self.pos_x > to_x && self.pos_y < to_y {
+                for (i, j) in (to_x..self.pos_x).rev().zip(self.pos_y..to_y) {
+                    if i == self.pos_x && j == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(i, j) {
+                            return false;
+                        }
+                    }
+                }
+            } else if self.pos_x < to_x && self.pos_y > to_y {
+                for (i, j) in (self.pos_x..to_x).zip((to_y..self.pos_y).rev()) {
+                    if i == self.pos_x && j == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(i, j) {
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                for (i, j) in (to_x..self.pos_x).rev().zip((to_y..self.pos_y).rev()) {
+                    if i == self.pos_x && j == self.pos_y {
+                        continue;
+                    } else {
+                        if !board.is_empty_tile(i, j) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -246,10 +301,17 @@ impl Piece {
         if !board.is_empty_tile(to_x, to_y) && board.is_piece_white(to_x, to_y) == self.is_white {
             return false;
         }
+        if to_x == self.pos_x && to_y == self.pos_y {
+            return false;
+        }
         if (to_x as i128 - self.pos_x as i128).abs() == 1
-            || (to_y as i128 - self.pos_y as i128).abs() == 1
+            || (to_x as i128 - self.pos_x as i128).abs() == 0
         {
-            return true;
+            if (to_y as i128 - self.pos_y as i128).abs() == 1
+                || (to_y as i128 - self.pos_y as i128).abs() == 0
+            {
+                return true;
+            }
         }
         if to_x == self.pos_x + 2
             && to_y == self.pos_y
@@ -258,7 +320,7 @@ impl Piece {
         {
             return true;
         }
-        if to_x == self.pos_x - 2
+        if to_x + 2 == self.pos_x
             && to_y == self.pos_y
             && board.check_orig(self.pos_x, self.pos_y)
             && board.check_orig(0, to_y)
