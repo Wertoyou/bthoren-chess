@@ -247,8 +247,11 @@ impl Game {
         &self.board
     }
 
+    pub fn no_moves(&self) -> bool {
+        self.all_moves.is_empty()
+    }
+  
     pub fn next(&mut self, from: (usize, usize), to: (usize, usize, PieceType)) {
-        self.calc_all_moves();
         if self.all_moves.contains_key(&from) {
             if self
                 .all_moves
@@ -259,6 +262,8 @@ impl Game {
                 self.move_now(&from, &to);
             }
         }
+        self.whites_turn = !self.whites_turn;
+        self.calc_all_moves();
     }
 
     pub fn get_coords_from_string(s: String) -> (usize, usize) {
