@@ -247,6 +247,29 @@ impl GameState {
                 self.next_move = None;
             }
 
+            let normal_move = |game: &mut Game,
+                               stream: &mut TcpStream,
+                               origin: (usize, usize),
+                               target: (usize, usize)| {
+                if let Some(moves) = game.moves_from(origin) {
+                    let net_move = (target.0, target.1, moves[0].2);
+                    let mut found = false;
+                    for r#move in moves {
+                        if r#move == &net_move {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if found {
+                        game.next(origin, net_move);
+                    } else {
+                        stream.write(&[1; 1]).unwrap();
+                        stream.flush().unwrap();
+                    }
+                }
+            };
+
             unsafe {
                 match r#move {
                     Move {
@@ -256,10 +279,8 @@ impl GameState {
                     } => {
                         let origin = to_coords(data.origin);
                         let target = to_coords(data.target);
-                        if let Some(moves) = self.game.moves_from(origin) {
-                            let r#type = moves[0].2;
-                            self.game.next(origin, (target.0, target.1, r#type));
-                        }
+
+                        normal_move(&mut self.game, stream, origin, target);
                     }
                     Move {
                         _padding: 1,
@@ -268,10 +289,8 @@ impl GameState {
                     } => {
                         let origin = to_coords(data.origin);
                         let target = to_coords(data.target);
-                        if let Some(moves) = self.game.moves_from(origin) {
-                            let r#type = moves[0].2;
-                            self.game.next(origin, (target.0, target.1, r#type));
-                        }
+
+                        normal_move(&mut self.game, stream, origin, target);
                     }
                     Move {
                         _padding: 1,
@@ -287,9 +306,26 @@ impl GameState {
                             2 => PieceType::Rook,
                             _ => PieceType::Queen,
                         };
+
                         let origin = to_coords(data.origin);
                         let target = to_coords(data.target);
-                        self.game.next(origin, (target.0, target.1, r#type));
+                        if let Some(moves) = self.game.moves_from(origin) {
+                            let net_move = (target.0, target.1, r#type);
+                            let mut found = false;
+                            for r#move in moves {
+                                if r#move == &net_move {
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if found {
+                                self.game.next(origin, net_move);
+                            } else {
+                                stream.write(&[1; 1]).unwrap();
+                                stream.flush().unwrap();
+                            }
+                        }
                     }
                     _ => {}
                 }
