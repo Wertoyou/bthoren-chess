@@ -456,6 +456,25 @@ impl event::EventHandler for GameState {
 }
 
 pub fn main() -> GameResult {
+    let mut args = env::args();
+    let _ = args.next();
+    let (stream, client) = if let Some(arg) = args.next() {
+        if arg == "--host" {
+            let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
+            (Some(listener.incoming().next().unwrap().unwrap()), false)
+        } else if arg == "--client" {
+            if let Some(arg) = args.next() {
+                (Some(TcpStream::connect(arg).unwrap()), true)
+            } else {
+                panic!("Expected ip address after --client");
+            }
+        } else {
+            panic!("Unknown command: {}", arg);
+        }
+    } else {
+        (None, false)
+    };
+
     let resource_dir = if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
         let mut path = std::path::PathBuf::from(manifest_dir);
         path.push("resources");
@@ -477,27 +496,6 @@ pub fn main() -> GameResult {
         .add_resource_path(resource_dir);
     let (ctx, event_loop) = &mut cb.build()?;
 
-    let mut args = env::args();
-    let _ = args.next();
-    let mut state = if let Some(arg) = args.next() {
-        if arg == "--host" {
-            let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
-
-            let stream = listener.incoming().next().unwrap().unwrap();
-            GameState::new(ctx, Some(stream), false)?
-        } else if arg == "--client" {
-            if let Some(arg) = args.next() {
-                let stream = TcpStream::connect(arg).unwrap();
-                GameState::new(ctx, Some(stream), true)?
-            } else {
-                panic!("Expected ip address after --client");
-            }
-        } else {
-            panic!("Unknown command: {}", arg);
-        }
-    } else {
-        GameState::new(ctx, None, false)?
-    };
-
-    event::run(ctx, event_loop, &mut state)
+    let state = &mut GameState::new(ctx, stream, client)?;
+    event::run(ctx, event_loop, state)
 }
